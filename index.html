@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TopicBox — AI Email Classifier for Gmail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Google Sans Text', 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1f1f1f;
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 40px;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: #1f1f1f;
+    }
+    .nav-logo {
+      width: 36px; height: 36px;
+      background: #c2e7ff; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #001d35;
+    }
+    .nav-brand span {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 20px; font-weight: 500;
+    }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a {
+      text-decoration: none; color: #444746;
+      font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #0b57d0; }
+    .nav-cta {
+      background: #0b57d0 !important; color: #fff !important;
+      padding: 8px 24px; border-radius: 100px;
+      font-weight: 500; transition: background 0.2s;
+    }
+    .nav-cta:hover { background: #0842a0 !important; }
+
+    /* ===== HERO ===== */
+    .hero {
+      padding: 140px 40px 80px;
+      text-align: center;
+      background: linear-gradient(180deg, #f6f8fc 0%, #fff 100%);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: #e8f0fe; color: #0b57d0;
+      padding: 6px 16px; border-radius: 100px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 56px; font-weight: 700;
+      line-height: 1.15;
+      max-width: 800px; margin: 0 auto 20px;
+      color: #1f1f1f;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, #0b57d0, #1a73e8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 20px; color: #444746;
+      max-width: 600px; margin: 0 auto 40px;
+      line-height: 1.5;
+    }
+    .hero-buttons {
+      display: flex; gap: 12px;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; border-radius: 100px;
+      font-family: 'Google Sans Text', sans-serif;
+      font-size: 16px; font-weight: 500;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #0b57d0; color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .btn-primary:hover {
+      background: #0842a0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .btn-secondary {
+      background: #e8f0fe; color: #0b57d0;
+    }
+    .btn-secondary:hover { background: #d3e3fd; }
+    .hero-image {
+      max-width: 1000px; margin: 60px auto 0;
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    .hero-image img {
+      width: 100%; display: block;
+    }
+    .screenshot-placeholder {
+      width: 100%; aspect-ratio: 16/9;
+      background: #f1f3f4;
+      display: flex; align-items: center; justify-content: center;
+      color: #80868b; font-size: 16px;
+      border: 2px dashed #dadce0; border-radius: 16px;
+    }
+
+    /* ===== FEATURES ===== */
+    .features {
+      padding: 100px 40px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .section-label {
+      text-align: center; font-size: 14px; font-weight: 500;
+      color: #0b57d0; text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      text-align: center;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 40px; font-weight: 700;
+      margin-bottom: 16px; color: #1f1f1f;
+    }
+    .section-subtitle {
+      text-align: center;
+      font-size: 18px; color: #444746;
+      max-width: 600px; margin: 0 auto 60px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .feature-card {
+      background: #f6f8fc;
+      border-radius: 16px; padding: 32px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: #c2e7ff; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 16px;
+    }
+    .feature-card h3 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 20px; font-weight: 600;
+      margin-bottom: 8px; color: #1f1f1f;
+    }
+    .feature-card p {
+      font-size: 14px; color: #444746; line-height: 1.6;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .how-it-works {
+      padding: 100px 40px;
+      background: #f6f8fc;
+    }
+    .steps {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+    }
+    .step {
+      text-align: center;
+    }
+    .step-number {
+      width: 48px; height: 48px;
+      background: #0b57d0; color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 20px; font-weight: 700;
+      margin: 0 auto 16px;
+    }
+    .step h3 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 16px; font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-size: 13px; color: #444746; line-height: 1.5;
+    }
+
+    /* ===== SCREENSHOTS ===== */
+    .screenshots {
+      padding: 100px 40px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .slider-wrapper {
+      position: relative;
+      max-width: 462px;
+      margin: 0 auto;
+    }
+    .slider-track {
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border: 1px solid #e0e0e0;
+    }
+    .slider-inner {
+      display: flex;
+      transition: transform 0.4s ease;
+    }
+    .screenshot-card {
+      min-width: 100%;
+      background: #f6f8fc;
+      flex-shrink: 0;
+    }
+    .screenshot-card img {
+      width: 100%;
+      height: 572px;
+      display: block;
+      object-fit: contain;
+    }
+    .screenshot-caption {
+      padding: 12px 16px;
+      font-size: 13px; font-weight: 500;
+      color: #444746;
+      text-align: center;
+      background: #f6f8fc;
+      border-top: 1px solid #e0e0e0;
+    }
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-60%);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #dadce0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      z-index: 5;
+      color: #444746;
+    }
+    .slider-btn:hover {
+      background: #f6f8fc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .slider-btn.prev { left: -18px; }
+    .slider-btn.next { right: -18px; }
+    .slider-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 16px;
+    }
+    .slider-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #dadce0;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0;
+    }
+    .slider-dot.active {
+      background: #0b57d0;
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    /* ===== AI PROVIDERS ===== */
+    .providers {
+      padding: 80px 40px;
+      background: #f6f8fc;
+      text-align: center;
+    }
+    .provider-logos {
+      display: flex; justify-content: center; gap: 48px;
+      align-items: center; flex-wrap: wrap;
+      max-width: 700px; margin: 0 auto;
+    }
+    .provider {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+    }
+    .provider-icon {
+      width: 64px; height: 64px;
+      background: #fff; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .provider span {
+      font-size: 14px; font-weight: 500; color: #444746;
+    }
+    .provider-note {
+      font-size: 13px; color: #80868b;
+      margin-top: 24px;
+    }
+
+    /* ===== PRIVACY ===== */
+    .privacy-section {
+      padding: 80px 40px;
+      max-width: 800px; margin: 0 auto;
+      text-align: center;
+    }
+    .privacy-points {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 20px; margin-top: 40px;
+      text-align: left;
+    }
+    .privacy-point {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: #f6f8fc; padding: 20px; border-radius: 12px;
+    }
+    .privacy-check {
+      width: 24px; height: 24px; flex-shrink: 0;
+      background: #ceead6; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .privacy-point p {
+      font-size: 14px; color: #1f1f1f;
+    }
+    .privacy-point small {
+      font-size: 12px; color: #80868b;
+    }
+
+    /* ===== SUPPORT ===== */
+    .support-section {
+      padding: 100px 40px;
+      max-width: 1000px; margin: 0 auto;
+      text-align: center;
+    }
+    .support-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; margin-top: 40px;
+    }
+    .support-card {
+      background: #f6f8fc; border-radius: 16px;
+      padding: 32px 24px; text-align: center;
+    }
+    .support-icon {
+      font-size: 36px; margin-bottom: 12px;
+    }
+    .support-card h3 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 18px; font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .support-card p {
+      font-size: 14px; color: #444746; line-height: 1.5;
+    }
+    .support-card .btn {
+      display: inline-flex; width: auto;
+      padding: 10px 20px; font-size: 13px;
+    }
+
+    /* ===== CTA ===== */
+    .cta {
+      padding: 100px 40px;
+      text-align: center;
+      background: linear-gradient(180deg, #fff 0%, #f6f8fc 100%);
+    }
+    .cta h2 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 40px; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .cta p {
+      font-size: 18px; color: #444746;
+      margin-bottom: 32px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 40px;
+      border-top: 1px solid #e0e0e0;
+      text-align: center;
+      color: #80868b; font-size: 13px;
+    }
+    footer a {
+      color: #0b57d0; text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 36px; }
+      .hero p { font-size: 17px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .slider-btn { display: none; }
+      .privacy-points { grid-template-columns: 1fr; }
+      .support-cards { grid-template-columns: 1fr; }
+      nav { padding: 0 20px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+    @media (max-width: 600px) {
+      .hero { padding: 120px 20px 60px; }
+      .hero h1 { font-size: 28px; }
+      .section-title { font-size: 28px; }
+      .steps { grid-template-columns: 1fr; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <div class="nav-logo">TB</div>
+      <span>TopicBox</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#support">Support</a>
+      <a href="#install" class="nav-cta">Install Free</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Chrome Extension for Gmail</div>
+    <h1>Classify your emails with <em>AI-powered</em> intelligence</h1>
+    <p>TopicBox organizes your Gmail inbox by topic using AI. Perfect for content creators, podcasters, and anyone who needs to manage email questions.</p>
+    <div class="hero-buttons">
+      <a href="#install" class="btn btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+        Add to Chrome — Free
+      </a>
+      <a href="#features" class="btn btn-secondary">See Features</a>
+    </div>
+    <div class="hero-image">
+      <img src="main_image.png" alt="TopicBox side panel open in Gmail showing classified emails">
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to manage email questions</h2>
+    <p class="section-subtitle">TopicBox sits quietly in your Gmail sidebar and brings order to your inbox with AI classification.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Multi-AI Classification</h3>
+        <p>Choose your AI provider — Google Gemini (free), Claude by Anthropic, or OpenAI GPT. Bring your own API key, pay only for what you use.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🏷️</div>
+        <h3>Smart Topic Detection</h3>
+        <p>Emails are automatically classified into customizable topics like Career, Finance, Health, Family, and more. Fully configurable to match your content.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>Country & Language Detection</h3>
+        <p>Automatically detects the sender's country and language from email content, helping you understand your global audience.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎲</div>
+        <h3>Episode Planner</h3>
+        <p>Pick random diverse questions for your podcast or show episodes. Ensures topic variety across episodes with smart diversity algorithms.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Export & Scripts</h3>
+        <p>Copy episode scripts to clipboard or export as HTML. Formatted and ready to use for your content production workflow.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <h3>Google Drive Sync</h3>
+        <p>Episode history syncs to your Google Drive automatically. Access your data across browsers and never lose your episode history.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Dashboard & Filters</h3>
+        <p>Filter emails by topic, country, language, and date range. Sort by newest or oldest. See stats at a glance with the dashboard view.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>Date Range Classification</h3>
+        <p>Classify emails from today, this week, this month, or up to the last 2 years. Control exactly which emails get processed.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Gmail-Native Design</h3>
+        <p>Built with Material Design 3 to match Gmail's modern look. Feels like a native part of your Gmail experience, not an add-on.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Up and running in 2 minutes</h2>
+    <p class="section-subtitle">No complex setup. Install, sign in, and start classifying.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Install Extension</h3>
+        <p>Add TopicBox from the Chrome Web Store. Click the extension icon to get started.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Sign in with Google</h3>
+        <p>Connect your Gmail account. TopicBox reads your unread emails securely through Gmail API.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Add Your AI Key</h3>
+        <p>Enter your Gemini, Claude, or OpenAI API key in settings. Gemini keys are free from Google.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <h3>Classify & Organize</h3>
+        <p>Hit "Classify" and watch your emails get sorted by topic. Pick questions for episodes and export.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENSHOTS -->
+  <section class="screenshots" id="screenshots">
+    <div class="section-label">Screenshots</div>
+    <h2 class="section-title">See TopicBox in action</h2>
+    <p class="section-subtitle">A clean, modern interface that works right inside Gmail.</p>
+
+    <div class="slider-wrapper">
+      <div class="slider-track">
+        <div class="slider-inner" id="sliderInner">
+          <div class="screenshot-card">
+            <img src="email_list_topic_badges.png" alt="Dashboard with classified emails and topic badges">
+            <div class="screenshot-caption">Dashboard with classified emails, topic filters, and stats</div>
+          </div>
+          <div class="screenshot-card">
+            <img src="Screenshot_2.png" alt="AI classification in progress with progress bar">
+            <div class="screenshot-caption">AI classification with real-time progress tracking</div>
+          </div>
+          <div class="screenshot-card">
+            <img src="Screenshot_3.png" alt="Episode planner with selected questions">
+            <div class="screenshot-caption">Episode planner — pick random diverse questions for your show</div>
+          </div>
+          <div class="screenshot-card">
+            <img src="Screenshot_4.png" alt="Episode history with Drive sync">
+            <div class="screenshot-caption">Episode history with Google Drive sync across browsers</div>
+          </div>
+        </div>
+      </div>
+      <button class="slider-btn prev" onclick="slideTo(currentSlide - 1)">‹</button>
+      <button class="slider-btn next" onclick="slideTo(currentSlide + 1)">›</button>
+      <div class="slider-dots" id="sliderDots">
+        <button class="slider-dot active" onclick="slideTo(0)"></button>
+        <button class="slider-dot" onclick="slideTo(1)"></button>
+        <button class="slider-dot" onclick="slideTo(2)"></button>
+        <button class="slider-dot" onclick="slideTo(3)"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI PROVIDERS -->
+  <section class="providers">
+    <div class="section-label">AI Providers</div>
+    <h2 class="section-title">Choose your AI engine</h2>
+    <p class="section-subtitle">Bring your own API key. Your data, your choice.</p>
+
+    <div class="provider-logos">
+      <div class="provider">
+        <div class="provider-icon">✨</div>
+        <span>Google Gemini</span>
+      </div>
+      <div class="provider">
+        <div class="provider-icon">🧠</div>
+        <span>Claude (Anthropic)</span>
+      </div>
+      <div class="provider">
+        <div class="provider-icon">⚡</div>
+        <span>OpenAI GPT</span>
+      </div>
+    </div>
+    <p class="provider-note">Google Gemini API keys are free. Claude and OpenAI require a paid API key.</p>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="privacy-section" id="privacy">
+    <div class="section-label">Privacy First</div>
+    <h2 class="section-title">Your data stays yours</h2>
+    <p class="section-subtitle">TopicBox is designed with privacy at its core. No servers, no tracking, no data collection.</p>
+
+    <div class="privacy-points">
+      <div class="privacy-point">
+        <div class="privacy-check">✓</div>
+        <div>
+          <p>No external servers</p>
+          <small>All data stays on your device and your Google account</small>
+        </div>
+      </div>
+      <div class="privacy-point">
+        <div class="privacy-check">✓</div>
+        <div>
+          <p>No tracking or analytics</p>
+          <small>Zero telemetry. We don't know who uses TopicBox</small>
+        </div>
+      </div>
+      <div class="privacy-point">
+        <div class="privacy-check">✓</div>
+        <div>
+          <p>Bring your own API key</p>
+          <small>Your key, your account, your AI provider relationship</small>
+        </div>
+      </div>
+      <div class="privacy-point">
+        <div class="privacy-check">✓</div>
+        <div>
+          <p>Open permission model</p>
+          <small>Only requests the Gmail and Drive permissions it needs</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUPPORT -->
+  <section class="support-section" id="support">
+    <div class="section-label">Support</div>
+    <h2 class="section-title">We're here to help</h2>
+    <p class="section-subtitle">Have a question, found a bug, or want to suggest a feature? Reach out to us.</p>
+
+    <div class="support-cards">
+      <div class="support-card">
+        <div class="support-icon">📧</div>
+        <h3>Email Support</h3>
+        <p>Send us an email and we'll get back to you as soon as possible.</p>
+        <a href="mailto:topicboxapp@gmail.com" class="btn btn-secondary" style="margin-top:12px;">topicboxapp@gmail.com</a>
+      </div>
+      <div class="support-card">
+        <div class="support-icon">🐛</div>
+        <h3>Report a Bug</h3>
+        <p>Found something that doesn't work right? Let us know so we can fix it.</p>
+        <a href="mailto:topicboxapp@gmail.com?subject=Bug Report: TopicBox&body=Please describe the issue:%0A%0ASteps to reproduce:%0A1.%0A2.%0A3.%0A%0AExpected behavior:%0A%0AActual behavior:%0A%0ABrowser version:%0A" class="btn btn-secondary" style="margin-top:12px;">Report Bug</a>
+      </div>
+      <div class="support-card">
+        <div class="support-icon">💡</div>
+        <h3>Feature Request</h3>
+        <p>Have an idea that would make TopicBox better? We'd love to hear it.</p>
+        <a href="mailto:topicboxapp@gmail.com?subject=Feature Request: TopicBox&body=Feature description:%0A%0AWhy this would be useful:%0A" class="btn btn-secondary" style="margin-top:12px;">Suggest Feature</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="install">
+    <h2>Ready to organize your inbox?</h2>
+    <p>Install TopicBox and start classifying emails in minutes. Free to use with Google Gemini.</p>
+    <a href="#" class="btn btn-primary" id="installBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+      Add to Chrome — Free
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Inspired by <a href="https://www.youtube.com/@AskGanjiswag" target="_blank" rel="noopener">AskGanjiswag</a> — born from the real struggle of organizing listener questions to help people through his channel.</p>
+    <p style="margin-top: 8px;">TopicBox &copy; 2026. Built for content creators. <a href="topicbox/privacy-policy.html">Privacy Policy</a> · <a href="mailto:topicboxapp@gmail.com">Contact</a></p>
+  </footer>
+
+  <script>
+    var currentSlide = 0;
+    var totalSlides = 4;
+    var autoSlideTimer;
+
+    function slideTo(index) {
+      if (index < 0) index = totalSlides - 1;
+      if (index >= totalSlides) index = 0;
+      currentSlide = index;
+      document.getElementById('sliderInner').style.transform = 'translateX(-' + (index * 100) + '%)';
+      var dots = document.querySelectorAll('.slider-dot');
+      for (var i = 0; i < dots.length; i++) {
+        dots[i].classList.toggle('active', i === index);
+      }
+      resetAutoSlide();
+    }
+
+    function resetAutoSlide() {
+      clearInterval(autoSlideTimer);
+      autoSlideTimer = setInterval(function() { slideTo(currentSlide + 1); }, 5000);
+    }
+
+    resetAutoSlide();
+  </script>
+</body>
+</html>
