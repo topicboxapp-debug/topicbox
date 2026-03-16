@@ -309,7 +309,7 @@
         <li>Each provider's data handling is governed by their own privacy policy and API terms of service.</li>
         <li>TopicBox never sees, logs, or stores your API keys on any external server. Keys are kept in your browser's local storage.</li>
       </ul>
-      <p>Classified topics and Gmail labels are used to organize emails and help you plan podcast episodes. Episode history can optionally be synced to your Google Drive (see Data Storage below).</p>
+      <p>Classified topics and Gmail labels are used to organize emails and help you plan podcast episodes. Episode history is stored locally in your browser.</p>
     </div>
 
     <!-- 3. Data Storage -->
@@ -326,14 +326,6 @@
       </ul>
       <p>All local data resides entirely within your browser and is never transmitted externally.</p>
 
-      <h3>Google Drive (appDataFolder)</h3>
-      <p>If you use episode sync, TopicBox stores episode history in your Google Drive's hidden <code>appDataFolder</code>. This is a special folder that:</p>
-      <ul>
-        <li>Is only accessible by TopicBox &mdash; other apps and users cannot see it</li>
-        <li>Lives in your own Google Drive storage quota</li>
-        <li>Is automatically removed if you uninstall the extension and revoke access</li>
-      </ul>
-
       <h3>No External Servers</h3>
       <p>TopicBox does not operate any backend servers, databases, or cloud infrastructure. There is no place for your data to be stored outside of your browser and your own Google account.</p>
     </div>
@@ -349,7 +341,6 @@
       <h3>Google APIs</h3>
       <ul>
         <li><strong>Gmail API</strong> &mdash; Read emails, create/manage labels, and modify label assignments for organization</li>
-        <li><strong>Google Drive API</strong> &mdash; Sync episode history to your Drive's appDataFolder</li>
         <li><strong>Google Identity</strong> &mdash; Authenticate your Google account within the extension</li>
       </ul>
 
@@ -373,7 +364,7 @@
       <div class="perm-grid">
         <div class="perm-item">
           <span class="perm-name">identity</span>
-          <span class="perm-desc">Sign in with your Google account to access Gmail and Drive APIs on your behalf.</span>
+          <span class="perm-desc">Sign in with your Google account to access Gmail APIs on your behalf.</span>
         </div>
         <div class="perm-item">
           <span class="perm-name">storage</span>
@@ -396,10 +387,6 @@
           <span class="perm-desc">Apply topic labels to your emails so they appear organized in Gmail.</span>
         </div>
         <div class="perm-item">
-          <span class="perm-name">drive.appdata</span>
-          <span class="perm-desc">Store episode history in a hidden app-specific folder in your Google Drive.</span>
-        </div>
-        <div class="perm-item">
           <span class="perm-name">userinfo.email</span>
           <span class="perm-desc">Display your signed-in email address within the extension UI.</span>
         </div>
@@ -416,9 +403,8 @@
       <ul>
         <li><strong>View &amp; delete local data</strong> &mdash; Clear all cached data from within the extension settings or by clearing your browser's extension storage.</li>
         <li><strong>Revoke Google access</strong> &mdash; Remove TopicBox's access to your Google account at any time via your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener" style="color:#1a73e8;">Google Account permissions</a>.</li>
-        <li><strong>Delete Drive data</strong> &mdash; Episode data in your appDataFolder is removed when you revoke the extension's access, or you can clear it from within the extension.</li>
         <li><strong>Remove API keys</strong> &mdash; Delete your stored API keys at any time from the extension settings.</li>
-        <li><strong>Uninstall</strong> &mdash; Removing the extension from Chrome deletes all locally stored data. Revoking Google permissions removes the appDataFolder data from your Drive.</li>
+        <li><strong>Uninstall</strong> &mdash; Removing the extension from Chrome deletes all locally stored data.</li>
       </ul>
     </div>
 
